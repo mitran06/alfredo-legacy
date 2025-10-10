@@ -1,0 +1,35 @@
+google:
+  # Gemini API key loaded from environment variable
+  gemini_api_key: "${GEMINI_API_KEY}"
+  
+  # Google Calendar MCP configuration
+  calendar_mcp_path: "${MCP_SERVER_PATH}"
+  oauth_credentials_path: "${GOOGLE_OAUTH_CREDENTIALS}"
+  primary_calendar_id: "${PRIMARY_CALENDAR_ID:primary}"
+
+reminders:
+  enabled: true
+  check_interval_seconds: 300  # Check every 5 minutes
+  default_rules:
+    - offset_minutes: 1440  # 1 day before
+      message_template: "Reminder: You have '{event_summary}' tomorrow at {event_time}"
+      enabled: true
+    - offset_minutes: 60    # 1 hour before
+      message_template: "Upcoming: '{event_summary}' starts in 1 hour at {event_time}"
+      enabled: true
+
+conversation:
+  max_history: 50
+  context_window: 10
+  model: "gemini-2.5-flash"  # or "gemini-2.0-flash-exp"
+
+terminal:
+  prompt: "You: "
+  assistant_prefix: "Assistant: "
+  log_prefix: "[LOG]"
+  show_timestamps: true
+  
+logging:
+  level: "${LOG_LEVEL:INFO}"
+  format: "%(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
