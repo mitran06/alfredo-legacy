@@ -8,7 +8,7 @@ The Calendar Assistant exposes a lightweight REST API so other systems can conve
 
 | Item                | Details |
 | ------------------- | ------- |
-| Base URL            | `http://<host>:<port>` (default `http://localhost:8000` when run locally) |
+| Base URL            | `http://<host>:<port>` (default `http://100.127.243.52:8000` when run locally) |
 | Transport           | HTTP over JSON |
 | Authentication      | None (add your own reverse proxy or gateway if required) |
 | Content-Type        | `application/json` for requests/responses |
@@ -30,7 +30,7 @@ The Calendar Assistant exposes a lightweight REST API so other systems can conve
 3. Verify the service is up:
 
    ```powershell
-   curl http://localhost:8000/health
+   curl http://100.127.243.52:8000/health
    ```
 
    Expected response snippet:
@@ -97,7 +97,7 @@ Send a message to the assistant and receive the AI response plus tool metadata.
 **cURL example**
 
 ```powershell
-curl -X POST http://localhost:8000/chat `
+curl -X POST http://100.127.243.52:8000/chat `
   -H "Content-Type: application/json" `
   -d '{"message": "Remind me tomorrow at 9am to call Alex"}'
 ```
@@ -111,7 +111,7 @@ http POST :8000/chat message="What do I have on Friday?"
 **JavaScript (fetch) snippet**
 
 ```javascript
-const res = await fetch("http://localhost:8000/chat", {
+const res = await fetch("http://100.127.243.52:8000/chat", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ message: "Schedule a lunch with Sam next Tuesday" }),
@@ -137,7 +137,7 @@ Reset the assistant's conversation memory.
 **cURL example**
 
 ```powershell
-curl -X POST http://localhost:8000/conversation/clear
+curl -X POST http://100.127.243.52:8000/conversation/clear
 ```
 
 ---
@@ -176,7 +176,7 @@ Retrieve structured statistics about the conversation and reminder service.
 **cURL example**
 
 ```powershell
-curl http://localhost:8000/stats
+curl http://100.127.243.52:8000/stats
 ```
 
 ---
@@ -207,7 +207,7 @@ Fetch reminder notifications that have fired. This endpoint can either flush the
 **cURL example pulling without flushing**
 
 ```powershell
-curl "http://localhost:8000/notifications?limit=50&flush=false"
+curl "http://100.127.243.52:8000/notifications?limit=50&flush=false"
 ```
 
 Integrate this with cron jobs, worker queues, or messaging systems to forward reminders to SMS, Slack, etc.
@@ -273,7 +273,7 @@ All endpoints return standard HTTP status codes.
 
 ### Postman
 
-1. Import a new request with `POST http://localhost:8000/chat`.
+1. Import a new request with `POST http://100.127.243.52:8000/chat`.
 2. Set headers `Content-Type: application/json`.
 3. Body (raw JSON): `{ "message": "List my events for next week" }`.
 4. Save the collection for reuse and add tests verifying presence of `tools_used`.
@@ -283,7 +283,7 @@ All endpoints return standard HTTP status codes.
 ```python
 import requests
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://100.127.243.52:8000"
 
 resp = requests.post(
     f"{BASE_URL}/chat",
@@ -298,7 +298,7 @@ print(resp.json()["message"])
 
 ```powershell
 $body = @{ message = "What's on my calendar tomorrow?" } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri "http://localhost:8000/chat" -ContentType "application/json" -Body $body
+Invoke-RestMethod -Method Post -Uri "http://100.127.243.52:8000/chat" -ContentType "application/json" -Body $body
 ```
 
 ---
