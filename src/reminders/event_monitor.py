@@ -200,13 +200,19 @@ class EventMonitor:
             max_offset = max(rule.offset_minutes for rule in self.reminder_rules) if self.reminder_rules else 1440
             time_max = now + timedelta(minutes=max_offset + 60)  # Add buffer
             
+            # Format times properly for MCP (YYYY-MM-DDTHH:MM:SS format, no microseconds)
+            time_min_str = now.strftime("%Y-%m-%dT%H:%M:%S")
+            time_max_str = time_max.strftime("%Y-%m-%dT%H:%M:%S")
+            
             # List upcoming events
-            events = await self.mcp_client.list_events(
+            event_list = await self.mcp_client.list_events(
                 calendar_id="primary",
-                time_min=now.isoformat(),
-                time_max=time_max.isoformat()
+                time_min=time_min_str,
+                time_max=time_max_str
             )
             
+            # Get events from EventList
+            events = event_list.events if hasattr(event_list, 'events') else event_list
             log_debug(f"Found {len(events)} upcoming events")
             
             # Check each event against reminder rules

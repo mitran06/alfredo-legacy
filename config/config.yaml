@@ -9,7 +9,7 @@ google:
 
 reminders:
   enabled: true
-  check_interval_seconds: 300  # Check every 5 minutes
+  check_interval_seconds: 30  # Check every 30 seconds for better responsiveness
   default_rules:
     - offset_minutes: 1440  # 1 day before
       message_template: "Reminder: You have '{event_summary}' tomorrow at {event_time}"

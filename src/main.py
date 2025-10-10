@@ -2,13 +2,8 @@
 
 import asyncio
 import sys
-from pathlib import Path
-import time
 
-from src.ai.gemini_agent import GeminiAgent
-from src.calendar_mcp.mcp_client import MCPClient
-from src.reminders.reminder_service import ReminderService
-from config.config import load_config
+from src.app.assistant_app import AssistantApp
 from src.utils.logger import log_info, log_error
 
 
@@ -67,53 +62,16 @@ async def main():
     print("=" * 60)
     print()
     
-    # Load configuration
-    log_info("Loading configuration...")
-    try:
-        config = load_config()
-    except Exception as e:
-        log_error(f"Failed to load configuration: {e}")
-        print(f"Error: {e}")
-        return
-    
-    # Initialize MCP client
-    log_info("Initializing Google Calendar connection...")
-    mcp_client = MCPClient(
-        mcp_server_path=config.google.calendar_mcp_path,
-        oauth_credentials_path=config.google.oauth_credentials_path
-    )
-    
+    assistant = AssistantApp()
+
     # Start notification display task
     notification_task = asyncio.create_task(notification_display_task())
-    
+
     try:
-        # Connect to MCP server
-        await mcp_client.connect()
-        log_info("Connected to Google Calendar")
-        
-        # Initialize reminder service
-        log_info("Starting reminder service...")
-        reminder_service = ReminderService(
-            mcp_client=mcp_client,
-            config=config.reminders
-        )
-        
-        # Set notification callback
-        reminder_service.set_terminal_callback(display_notification)
-        
-        # Start reminder service in background
-        await reminder_service.start()
-        log_info("Reminder service started")
-        
-        # Initialize Gemini agent with reminder service
-        log_info("Initializing AI agent...")
-        agent = GeminiAgent(
-            api_key=config.google.gemini_api_key,
-            mcp_client=mcp_client,
-            model_name=config.conversation.model,
-            reminder_service=reminder_service
-        )
-        log_info("Ready")
+        log_info("Starting assistant services...")
+        await assistant.startup()
+        assistant.register_notification_callback(display_notification)
+        log_info("Assistant services ready")
         
         print()
         print("Assistant: Hello! I'm your personal calendar assistant.")
@@ -155,13 +113,13 @@ async def main():
                         continue
                     
                     elif user_input == "/clear":
-                        agent.clear_conversation()
+                        assistant.clear_conversation()
                         print("\nAssistant: Conversation cleared! Starting fresh.\n")
                         continue
                     
                     elif user_input == "/stats":
-                        stats = agent.get_conversation_stats()
-                        reminder_stats = reminder_service.get_stats()
+                        stats = assistant.get_conversation_stats()
+                        reminder_stats = assistant.get_reminder_stats()
                         print(f"\nConversation Statistics:")
                         print(f"  Total messages: {stats['total_messages']}")
                         print(f"  User messages: {stats['user_messages']}")
@@ -180,7 +138,7 @@ async def main():
                         continue
                 
                 # Process message with AI agent
-                response = await agent.process_message(user_input)
+                response = await assistant.process_message(user_input)
                 
                 # Display response
                 print(f"\nAssistant: {response.message}\n")
@@ -217,11 +175,7 @@ async def main():
                 pass
         
         # Stop reminder service
-        if 'reminder_service' in locals():
-            await reminder_service.stop()
-        
-        # Disconnect MCP
-        await mcp_client.disconnect()
+        await assistant.shutdown()
         print("\nDisconnected from calendar. Goodbye!")
 
 
